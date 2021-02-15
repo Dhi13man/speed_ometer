@@ -10,4 +10,4 @@ A speedometer that displays the current velocity of the phone's movement, while 
 
 ### Screenshot
 
-![Main Screen](https://raw.githubusercontent.com/Dhi13man/speed_ometer/main/Screenshot.png)
+![Main Screen](https://raw.githubusercontent.com/Dhi13man/speed_ometer/main/Screenshot.jpg)
