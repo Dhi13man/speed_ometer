@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
+/// The central speedometer made using Syncfusion gauge package, that shows current speed
+///
+/// Also shows highest speed so far since app was opened
 class Speedometer extends StatelessWidget {
   const Speedometer({
     Key key,
@@ -18,14 +21,14 @@ class Speedometer extends StatelessWidget {
 
   final String velocityUnit;
 
-  final TextStyle _annotationTextStyle = const TextStyle(
-    fontSize: 20,
-    fontWeight: FontWeight.bold,
-    color: Colors.white,
-  );
-
   @override
   Widget build(BuildContext context) {
+    const TextStyle _annotationTextStyle = TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+    );
+
     return SfRadialGauge(
       axes: <RadialAxis>[
         RadialAxis(
@@ -58,17 +61,14 @@ class Speedometer extends StatelessWidget {
               sizeUnit: GaugeSizeUnit.factor,
               startWidth: 0.03,
               endWidth: 0.03,
-              gradient: SweepGradient(
-                colors: const <Color>[
-                  Colors.green,
-                  Colors.yellow,
-                  Colors.red,
-                ],
-                stops: const <double>[0.0, 0.5, 1],
+              gradient: const SweepGradient(
+                colors: <Color>[Colors.green, Colors.yellow, Colors.red],
+                stops: <double>[0.0, 0.5, 1],
               ),
             ),
           ],
           pointers: <GaugePointer>[
+            // Current Speed pointer
             NeedlePointer(
               value: maxVelocity,
               needleLength: 0.95,
@@ -79,6 +79,7 @@ class Speedometer extends StatelessWidget {
               needleColor: Colors.white54,
               knobStyle: KnobStyle(knobRadius: 0.09),
             ),
+            // Highest Speed pointer
             NeedlePointer(
               value: velocity,
               needleLength: 0.95,
@@ -100,7 +101,7 @@ class Speedometer extends StatelessWidget {
                       velocity.toStringAsFixed(2),
                       style: _annotationTextStyle.copyWith(fontSize: 25),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     Text(velocityUnit, style: _annotationTextStyle),
                   ],
                 ),

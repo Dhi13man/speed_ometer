@@ -3,9 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
 
-import 'speedometer_container.dart';
+import 'package:speed_ometer/main_screen.dart';
 
 void main() {
+  // Placeholder Splash Screen Material App.
   runApp(NoPermissionApp(hasCheckedPermissions: false));
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -20,27 +21,31 @@ void main() {
   );
 }
 
+/// MaterialApp that launches when proper permissions granted
 class SpeedometerApp extends StatefulWidget {
   @override
   _SpeedometerAppState createState() => _SpeedometerAppState();
 }
 
 class _SpeedometerAppState extends State<SpeedometerApp> {
-  /// Shared preferences to be loaded for persistence
+  /// Shared preferences to be loaded for persistence.
   SharedPreferences sharedPreferences;
 
   /// Unit selection
   final List<String> units = const <String>['m/s', 'km/h', 'miles/h'];
   String currentSelectedUnit = 'm/s';
 
-  void unitSelectorFunciton(String newUnit) => setState(
-        () => currentSelectedUnit = newUnit,
-      );
+  /// Function to save newly selected unit [newUnit] to persistent storage if possible, and update state.
+  void unitSelectorFunciton(String newUnit) {
+    if (sharedPreferences != null) sharedPreferences.setString('unit', newUnit);
+    setState(() => currentSelectedUnit = newUnit);
+  }
 
   @override
   void initState() {
     super.initState();
 
+    // Load Selected unit through Shared Preferences
     SharedPreferences.getInstance().then(
       (SharedPreferences prefs) {
         sharedPreferences = prefs;
@@ -74,14 +79,16 @@ class _SpeedometerAppState extends State<SpeedometerApp> {
                 .copyWith(color: Colors.white),
           ),
           backgroundColor: Colors.black,
-          actions: units.map<Widget>((String unitType) {
-            return UnitSelectionButton(
-              unitButtonName: unitType,
-              currentSelectedUnit: currentSelectedUnit,
-              unitSelector: unitSelectorFunciton,
-              sharedPreferences: sharedPreferences,
-            );
-          }).toList(),
+          // Makes one Unit Selection button for each potential unit (m/s, km/h and miles/h programmed)
+          actions: units.map<Widget>(
+            (String unitType) {
+              return UnitSelectionButton(
+                unitButtonName: unitType,
+                currentSelectedUnit: currentSelectedUnit,
+                unitSelector: unitSelectorFunciton,
+              );
+            },
+          ).toList(),
         ),
         body: MainScreen(unit: currentSelectedUnit),
       ),
@@ -89,19 +96,17 @@ class _SpeedometerAppState extends State<SpeedometerApp> {
   }
 }
 
+/// TextButton that enables user to select this particular unit
 class UnitSelectionButton extends StatelessWidget {
   const UnitSelectionButton({
     Key key,
     this.unitButtonName = 'm/s',
     @required this.currentSelectedUnit,
     @required this.unitSelector,
-    @required this.sharedPreferences,
   }) : super(key: key);
 
   final String unitButtonName, currentSelectedUnit;
   final void Function(String) unitSelector;
-
-  final SharedPreferences sharedPreferences;
 
   @override
   Widget build(BuildContext context) {
@@ -111,11 +116,7 @@ class UnitSelectionButton extends StatelessWidget {
     return Container(
       padding: EdgeInsets.only(right: 10),
       child: FlatButton(
-        onPressed: () {
-          unitSelector(unitButtonName);
-          if (sharedPreferences != null)
-            sharedPreferences.setString('unit', unitButtonName);
-        },
+        onPressed: () => unitSelector(unitButtonName),
         minWidth: 0,
         padding: EdgeInsets.zero,
         child: Text(unitButtonName, style: TextStyle(color: textColor)),
@@ -124,6 +125,7 @@ class UnitSelectionButton extends StatelessWidget {
   }
 }
 
+/// MaterialApp that launches when permissions still being searched, or denied forever.
 class NoPermissionApp extends StatelessWidget {
   const NoPermissionApp({
     Key key,
