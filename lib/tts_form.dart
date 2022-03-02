@@ -61,7 +61,7 @@ class TextToSpeechSettingsForm extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
               onPressed: () => showDialog(
                 context: context,
-                child: AlertDialog(
+                builder: (BuildContext context) => AlertDialog(
                   backgroundColor: const Color(0xFF252222),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
