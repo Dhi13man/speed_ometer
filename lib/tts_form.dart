@@ -1,14 +1,13 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:gender_picker/gender_picker.dart';
+import 'package:gender_picker/source/enums.dart';
 import 'package:numberpicker/numberpicker.dart';
-
-import 'package:gender_selection/gender_selection.dart';
 
 /// Form that allows user to modify Text to Speech Speed Narration Settings.
 ///
 /// Available settings: Narration On or Off, Frequency of Narration, Male or Female TTS Voice
 class TextToSpeechSettingsForm extends StatelessWidget {
-  TextToSpeechSettingsForm({
+  const TextToSpeechSettingsForm({
     @required this.isTTSActive,
     @required this.isTTSFemale,
     @required this.currentDuration,
@@ -56,9 +55,14 @@ class TextToSpeechSettingsForm extends StatelessWidget {
           ),
           Container(
             margin: const EdgeInsets.symmetric(vertical: 20, horizontal: 30),
-            child: FlatButton(
-              color: const Color(0xFFD68822),
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+            child: TextButton(
+              style: ButtonStyle(
+                backgroundColor:
+                    MaterialStateProperty.all(const Color(0xFFD68822)),
+                padding: MaterialStateProperty.all(
+                  const EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                ),
+              ),
               onPressed: () => showDialog(
                 context: context,
                 builder: (BuildContext context) => AlertDialog(
@@ -90,15 +94,19 @@ class TextToSpeechSettingsForm extends StatelessWidget {
               ),
             ),
           ),
-          GenderSelection(
+          GenderPickerWithImage(
+            showOtherGender: true,
+            verticalAlignedText: false,
             selectedGender: (isTTSFemale) ? Gender.Female : Gender.Male,
             unSelectedGenderTextStyle: const TextStyle(color: Colors.white),
-            onChanged: (Gender gender) {
-              bool isFemale = gender == Gender.Female;
-              femaleSetter(isFemale);
-            },
-            size: 70,
-            padding: const EdgeInsets.all(0),
+            onChanged: (Gender gender) => femaleSetter(gender == Gender.Female),
+            equallyAligned: true,
+            animationDuration: const Duration(milliseconds: 300),
+            isCircular: true,
+            // default : true,
+            opacityOfGradient: 0.4,
+            padding: const EdgeInsets.all(3),
+            size: 70, //default : 40
           ),
         ],
       ),
@@ -108,7 +116,7 @@ class TextToSpeechSettingsForm extends StatelessWidget {
 
 /// Pop up form that allows user to change Frequency of Speed Narration when button pressed.
 class TimeForm extends StatefulWidget {
-  TimeForm(
+  const TimeForm(
       {Key key,
       @required int currentSeconds,
       @required int currentMinutes,
@@ -146,7 +154,7 @@ class _TimeFormState extends State<TimeForm> {
           fontWeight: FontWeight.bold,
         ),
         unselectedTextStyle = TextStyle(color: Colors.white38, fontSize: 20);
-    return Container(
+    return SizedBox(
       height: 230,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -154,12 +162,12 @@ class _TimeFormState extends State<TimeForm> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              NumberPicker.integer(
+              NumberPicker(
                 zeroPad: true,
                 selectedTextStyle: selectedTextStyle,
                 textStyle: unselectedTextStyle,
-                listViewWidth: 65,
-                initialValue: _currentMinutes,
+                itemWidth: 65,
+                value: _currentMinutes,
                 minValue: 0,
                 maxValue: 59,
                 onChanged: (value) => setState(() => _currentMinutes = value),
@@ -168,12 +176,12 @@ class _TimeFormState extends State<TimeForm> {
                 ':',
                 style: TextStyle(fontSize: 25, color: Colors.white24),
               ),
-              NumberPicker.integer(
+              NumberPicker(
                 zeroPad: true,
                 selectedTextStyle: selectedTextStyle,
                 textStyle: unselectedTextStyle,
-                listViewWidth: 65,
-                initialValue: _currentSeconds,
+                itemWidth: 65,
+                value: _currentSeconds,
                 minValue: 3,
                 maxValue: 59,
                 onChanged: (value) => setState(() => _currentSeconds = value),
@@ -181,46 +189,48 @@ class _TimeFormState extends State<TimeForm> {
             ],
           ),
           Container(
-            margin: EdgeInsets.all(10),
-            child: FlatButton(
-              color: const Color(0xFF086624),
-              padding: const EdgeInsets.all(15),
+            margin: const EdgeInsets.all(10),
+            child: TextButton(
+              style: ButtonStyle(
+                backgroundColor:
+                    MaterialStateProperty.all(const Color(0xFF086624)),
+                padding: MaterialStateProperty.all(const EdgeInsets.all(15)),
+              ),
               onPressed: () {
-                widget.parentScaffold.hideCurrentSnackBar();
-
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 final int minutes = _currentMinutes;
                 final int seconds = _currentSeconds % 60;
                 final int convertedTime = minutes * 60 + seconds;
                 if (seconds > 60) {
-                  widget.parentScaffold.showSnackBar(
-                    SnackBar(content: const Text('Please convert to minutes!')),
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please convert to minutes!')),
                   );
                   return null;
                 } else if (seconds < 0) {
-                  widget.parentScaffold.showSnackBar(
-                    SnackBar(content: const Text('Please enter postive time!')),
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Please enter postive time!')),
                   );
                   return null;
                 }
                 if (seconds > 60) {
-                  widget.parentScaffold.showSnackBar(
-                    SnackBar(
-                      content: const Text('Enter between 1 and 60 minutes!'),
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Enter between 1 and 60 minutes!'),
                     ),
                   );
                   return null;
                 } else if (seconds < 0) {
-                  widget.parentScaffold.showSnackBar(
-                    SnackBar(
-                      content: const Text('Please enter postive time!'),
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please enter postive time!'),
                     ),
                   );
                   return null;
                 }
                 if (convertedTime < 3) {
-                  widget.parentScaffold.showSnackBar(
-                    SnackBar(
-                      content: const Text(
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
                         'Minimum time should be 3 seconds to avoid overlap!',
                       ),
                     ),

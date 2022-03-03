@@ -7,22 +7,25 @@ import 'package:speed_ometer/main_screen.dart';
 
 void main() {
   // Placeholder Splash Screen Material App.
-  runApp(NoPermissionApp(hasCheckedPermissions: false));
+  runApp(const NoPermissionApp(hasCheckedPermissions: false));
   WidgetsFlutterBinding.ensureInitialized();
 
   Geolocator.checkPermission().then(
     (LocationPermission permission) {
       // App must be reinstalled to be used if permission denied forever.
-      if (permission == LocationPermission.deniedForever)
-        runApp(NoPermissionApp(hasCheckedPermissions: true));
-      else // Run app and ask for permissions.
-        runApp(SpeedometerApp());
+      if (permission == LocationPermission.deniedForever) {
+        runApp(const NoPermissionApp(hasCheckedPermissions: true));
+      } else {
+        runApp(const SpeedometerApp());
+      }
     },
   );
 }
 
 /// MaterialApp that launches when proper permissions granted
 class SpeedometerApp extends StatefulWidget {
+  const SpeedometerApp({Key key}) : super(key: key);
+
   @override
   _SpeedometerAppState createState() => _SpeedometerAppState();
 }
@@ -112,13 +115,12 @@ class UnitSelectionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color textColor = unitButtonName != currentSelectedUnit
         ? Colors.white
-        : Color(0xFFE9A246);
+        : const Color(0xFFE9A246);
     return Container(
-      padding: EdgeInsets.only(right: 10),
-      child: FlatButton(
+      padding: const EdgeInsets.only(right: 10),
+      child: TextButton(
         onPressed: () => unitSelector(unitButtonName),
-        minWidth: 0,
-        padding: EdgeInsets.zero,
+        style: ButtonStyle(padding: MaterialStateProperty.all(EdgeInsets.zero)),
         child: Text(unitButtonName, style: TextStyle(color: textColor)),
       ),
     );
@@ -139,23 +141,23 @@ class NoPermissionApp extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget outWidget;
     // Splash screen mode
-    if (!_hasCheckedPermissions)
-      outWidget = Image(
+    if (!_hasCheckedPermissions) {
+      outWidget = const Image(
         image: AssetImage('images/splash_image.png'),
         alignment: Alignment.center,
         fit: BoxFit.contain,
       );
-    // Error Message mode
-    else
-      outWidget = Text(
-        'Location permissions permanently denied!\n' +
-            'Please reinstall app and provide permissions!',
+    } else {
+      outWidget = const Text(
+        'Location permissions permanently denied!\n'
+        'Please reinstall app and provide permissions!',
         style: TextStyle(
           color: Colors.red,
           fontSize: 15,
           fontWeight: FontWeight.bold,
         ),
       );
+    }
     return MaterialApp(
       home: Scaffold(
         backgroundColor: Colors.black,

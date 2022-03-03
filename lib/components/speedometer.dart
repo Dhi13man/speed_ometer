@@ -35,21 +35,21 @@ class Speedometer extends StatelessWidget {
           minimum: gaugeBegin,
           maximum: gaugeEnd,
           labelOffset: 30,
-          axisLineStyle: AxisLineStyle(
+          axisLineStyle: const AxisLineStyle(
             thicknessUnit: GaugeSizeUnit.factor,
             thickness: 0.03,
           ),
-          majorTickStyle: MajorTickStyle(
+          majorTickStyle: const MajorTickStyle(
             length: 6,
             thickness: 4,
             color: Colors.white,
           ),
-          minorTickStyle: MinorTickStyle(
+          minorTickStyle: const MinorTickStyle(
             length: 3,
             thickness: 3,
             color: Colors.white,
           ),
-          axisLabelStyle: GaugeTextStyle(
+          axisLabelStyle: const GaugeTextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 14,
@@ -77,7 +77,7 @@ class Speedometer extends StatelessWidget {
               needleStartWidth: 1.5,
               needleEndWidth: 6,
               needleColor: Colors.white54,
-              knobStyle: KnobStyle(knobRadius: 0.09),
+              knobStyle: const KnobStyle(knobRadius: 0.09),
             ),
             // Highest Speed pointer
             NeedlePointer(
@@ -88,23 +88,21 @@ class Speedometer extends StatelessWidget {
               needleStartWidth: 1.5,
               needleEndWidth: 6,
               needleColor: Colors.red,
-              knobStyle: KnobStyle(knobRadius: 0.09),
+              knobStyle: const KnobStyle(knobRadius: 0.09),
             ),
           ],
           annotations: <GaugeAnnotation>[
             GaugeAnnotation(
-              widget: Container(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      velocity.toStringAsFixed(2),
-                      style: _annotationTextStyle.copyWith(fontSize: 25),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(velocityUnit, style: _annotationTextStyle),
-                  ],
-                ),
+              widget: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    velocity.toStringAsFixed(2),
+                    style: _annotationTextStyle.copyWith(fontSize: 25),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(velocityUnit, style: _annotationTextStyle),
+                ],
               ),
               angle: 90,
               positionFactor: 0.75,

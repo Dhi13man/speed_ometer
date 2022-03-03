@@ -100,13 +100,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  gender_selection:
+  gender_picker:
     dependency: "direct main"
     description:
-      name: gender_selection
+      name: gender_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0"
+    version: "1.1.0"
   geolocator:
     dependency: "direct main"
     description:

@@ -5,14 +5,11 @@ import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
-import 'package:speed_ometer/speedometer.dart';
+import 'package:speed_ometer/components/speedometer.dart';
 import 'package:speed_ometer/tts_form.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({
-    this.unit = 'm/s',
-    Key key,
-  }) : super(key: key);
+  const MainScreen({this.unit = 'm/s', Key key}) : super(key: key);
 
   final String unit;
 
@@ -50,15 +47,17 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _startTTS() {
-    if (!_isTTSFemale)
+    if (!_isTTSFemale) {
       _ttsService.setVoice({'name': 'en-us-x-tpd-local', 'locale': 'en-US'});
-    else
+    } else {
       _ttsService.setVoice({'name': 'en-US-language', 'locale': 'en-US'});
+    }
 
     _ttsCallback?.cancel();
 
     if (_isTTSActive) _ttsService.speak(speakText);
-    _ttsCallback = Stream.periodic(_ttsDuration + Duration(seconds: 1)).listen(
+    _ttsCallback =
+        Stream.periodic(_ttsDuration + const Duration(seconds: 1)).listen(
       (event) {
         if (_isTTSActive) _ttsService.speak(speakText);
       },
@@ -71,10 +70,11 @@ class _MainScreenState extends State<MainScreen> {
         () {
           _isTTSActive = isActive;
           _sharedPreferences?.setBool('isTTSActive', _isTTSActive);
-          if (isActive)
+          if (isActive) {
             _startTTS();
-          else
+          } else {
             _ttsCallback?.cancel();
+          }
         },
       );
 
@@ -109,7 +109,7 @@ class _MainScreenState extends State<MainScreen> {
   GeolocatorPlatform locator = GeolocatorPlatform.instance;
 
   /// Stream that emits values when velocity updates
-  StreamController<double> _velocityUpdatedStreamController =
+  final StreamController<double> _velocityUpdatedStreamController =
       StreamController<double>();
 
   /// Current Velocity in m/s
@@ -128,11 +128,13 @@ class _MainScreenState extends State<MainScreen> {
   double convertedVelocity(double velocity) {
     velocity = velocity ?? _velocity;
 
-    if (widget.unit == 'm/s')
+    if (widget.unit == 'm/s') {
       return velocity;
-    else if (widget.unit == 'km/h')
+    } else if (widget.unit == 'km/h') {
       return mpstokmph(velocity);
-    else if (widget.unit == 'miles/h') return mpstomilesph(velocity);
+    } else if (widget.unit == 'miles/h') {
+      return mpstomilesph(velocity);
+    }
     return velocity;
   }
 
@@ -142,7 +144,9 @@ class _MainScreenState extends State<MainScreen> {
     // Speedometer functionality. Updates any time velocity chages.
     locator
         .getPositionStream(
-          desiredAccuracy: LocationAccuracy.bestForNavigation,
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.bestForNavigation,
+          ),
         )
         .listen(
           (Position position) => _onAccelerate(position.speed),
@@ -154,7 +158,6 @@ class _MainScreenState extends State<MainScreen> {
 
     // Set up tts
     _ttsService = FlutterTts();
-    _ttsService.setStartHandler(() => print('TALKING'));
     _ttsService.setSpeechRate(1);
 
     // Load Saved values (or default values when no saved values)
@@ -220,7 +223,6 @@ class _MainScreenState extends State<MainScreen> {
     // TTS
     _ttsCallback.cancel();
     _ttsService.stop();
-
     super.dispose();
   }
 }
