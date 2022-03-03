@@ -5,29 +5,26 @@ import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
-import 'package:speed_ometer/speedometer.dart';
-import 'package:speed_ometer/tts_form.dart';
+import 'package:speed_ometer/components/speedometer.dart';
+import 'package:speed_ometer/components/tts_form.dart';
 
-class MainScreen extends StatefulWidget {
-  const MainScreen({
-    this.unit = 'm/s',
-    Key key,
-  }) : super(key: key);
+class DashScreen extends StatefulWidget {
+  const DashScreen({this.unit = 'm/s', Key? key}) : super(key: key);
 
   final String unit;
 
   @override
-  _MainScreenState createState() => _MainScreenState();
+  _DashScreenState createState() => _DashScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
-  SharedPreferences _sharedPreferences;
+class _DashScreenState extends State<DashScreen> {
+  SharedPreferences? _sharedPreferences;
   // For text to speed naration of current velocity
   /// Initiate service
-  FlutterTts _ttsService;
+  late FlutterTts _ttsService;
 
   /// Create a stream trying to speak speed
-  StreamSubscription _ttsCallback;
+  StreamSubscription? _ttsCallback;
 
   /// String that the tts will read aloud, Speed + Expanded Unit
   String get speakText {
@@ -46,19 +43,21 @@ class _MainScreenState extends State<MainScreen> {
         unit = 'meters per second';
         break;
     }
-    return '${convertedVelocity(_velocity).toStringAsFixed(2)} $unit';
+    return '${convertedVelocity(_velocity)!.toStringAsFixed(2)} $unit';
   }
 
   void _startTTS() {
-    if (!_isTTSFemale)
+    if (!_isTTSFemale) {
       _ttsService.setVoice({'name': 'en-us-x-tpd-local', 'locale': 'en-US'});
-    else
+    } else {
       _ttsService.setVoice({'name': 'en-US-language', 'locale': 'en-US'});
+    }
 
     _ttsCallback?.cancel();
 
     if (_isTTSActive) _ttsService.speak(speakText);
-    _ttsCallback = Stream.periodic(_ttsDuration + Duration(seconds: 1)).listen(
+    _ttsCallback =
+        Stream.periodic(_ttsDuration! + const Duration(seconds: 1)).listen(
       (event) {
         if (_isTTSActive) _ttsService.speak(speakText);
       },
@@ -71,10 +70,11 @@ class _MainScreenState extends State<MainScreen> {
         () {
           _isTTSActive = isActive;
           _sharedPreferences?.setBool('isTTSActive', _isTTSActive);
-          if (isActive)
+          if (isActive) {
             _startTTS();
-          else
+          } else {
             _ttsCallback?.cancel();
+          }
         },
       );
 
@@ -89,7 +89,7 @@ class _MainScreenState extends State<MainScreen> {
       );
 
   /// TTS talk duraiton
-  Duration _ttsDuration;
+  Duration? _ttsDuration;
   void setDuration(int seconds) => setState(
         () {
           _ttsDuration = _secondsToDuration(seconds);
@@ -109,14 +109,13 @@ class _MainScreenState extends State<MainScreen> {
   GeolocatorPlatform locator = GeolocatorPlatform.instance;
 
   /// Stream that emits values when velocity updates
-  StreamController<double> _velocityUpdatedStreamController =
-      StreamController<double>();
+  late StreamController<double?> _velocityUpdatedStreamController;
 
   /// Current Velocity in m/s
-  double _velocity;
+  double? _velocity;
 
   /// Highest recorded velocity so far in m/s.
-  double _highestVelocity;
+  double? _highestVelocity;
 
   /// Velocity in m/s to km/hr converter
   double mpstokmph(double mps) => mps * 18 / 5;
@@ -125,14 +124,16 @@ class _MainScreenState extends State<MainScreen> {
   double mpstomilesph(double mps) => mps * 85 / 38;
 
   /// Relevant velocity in chosen unit
-  double convertedVelocity(double velocity) {
+  double? convertedVelocity(double? velocity) {
     velocity = velocity ?? _velocity;
 
-    if (widget.unit == 'm/s')
+    if (widget.unit == 'm/s') {
       return velocity;
-    else if (widget.unit == 'km/h')
-      return mpstokmph(velocity);
-    else if (widget.unit == 'miles/h') return mpstomilesph(velocity);
+    } else if (widget.unit == 'km/h') {
+      return mpstokmph(velocity!);
+    } else if (widget.unit == 'miles/h') {
+      return mpstomilesph(velocity!);
+    }
     return velocity;
   }
 
@@ -140,9 +141,12 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     // Speedometer functionality. Updates any time velocity chages.
+    _velocityUpdatedStreamController = StreamController<double?>();
     locator
         .getPositionStream(
-          desiredAccuracy: LocationAccuracy.bestForNavigation,
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.bestForNavigation,
+          ),
         )
         .listen(
           (Position position) => _onAccelerate(position.speed),
@@ -154,7 +158,6 @@ class _MainScreenState extends State<MainScreen> {
 
     // Set up tts
     _ttsService = FlutterTts();
-    _ttsService.setStartHandler(() => print('TALKING'));
     _ttsService.setSpeechRate(1);
 
     // Load Saved values (or default values when no saved values)
@@ -175,7 +178,7 @@ class _MainScreenState extends State<MainScreen> {
     locator.getCurrentPosition().then(
       (Position updatedPosition) {
         _velocity = (speed + updatedPosition.speed) / 2;
-        if (_velocity > _highestVelocity) _highestVelocity = _velocity;
+        if (_velocity! > _highestVelocity!) _highestVelocity = _velocity;
         _velocityUpdatedStreamController.add(_velocity);
       },
     );
@@ -189,7 +192,7 @@ class _MainScreenState extends State<MainScreen> {
       scrollDirection: Axis.vertical,
       children: <Widget>[
         // StreamBuilder updates Speedometer when new velocity recieved
-        StreamBuilder<Object>(
+        StreamBuilder<Object?>(
           stream: _velocityUpdatedStreamController.stream,
           builder: (context, snapshot) {
             return Speedometer(
@@ -218,9 +221,8 @@ class _MainScreenState extends State<MainScreen> {
     // Velocity Stream
     _velocityUpdatedStreamController.close();
     // TTS
-    _ttsCallback.cancel();
+    _ttsCallback!.cancel();
     _ttsService.stop();
-
     super.dispose();
   }
 }
