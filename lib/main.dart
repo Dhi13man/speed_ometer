@@ -24,7 +24,7 @@ void main() {
 
 /// MaterialApp that launches when proper permissions granted
 class SpeedometerApp extends StatefulWidget {
-  const SpeedometerApp({Key key}) : super(key: key);
+  const SpeedometerApp({Key? key}) : super(key: key);
 
   @override
   _SpeedometerAppState createState() => _SpeedometerAppState();
@@ -32,7 +32,7 @@ class SpeedometerApp extends StatefulWidget {
 
 class _SpeedometerAppState extends State<SpeedometerApp> {
   /// Shared preferences to be loaded for persistence.
-  SharedPreferences sharedPreferences;
+  SharedPreferences? sharedPreferences;
 
   /// Unit selection
   final List<String> units = const <String>['m/s', 'km/h', 'miles/h'];
@@ -40,7 +40,7 @@ class _SpeedometerAppState extends State<SpeedometerApp> {
 
   /// Function to save newly selected unit [newUnit] to persistent storage if possible, and update state.
   void unitSelectorFunciton(String newUnit) {
-    if (sharedPreferences != null) sharedPreferences.setString('unit', newUnit);
+    if (sharedPreferences != null) sharedPreferences!.setString('unit', newUnit);
     setState(() => currentSelectedUnit = newUnit);
   }
 
@@ -78,7 +78,7 @@ class _SpeedometerAppState extends State<SpeedometerApp> {
             'Speedometer',
             style: Theme.of(context)
                 .textTheme
-                .headline6
+                .headline6!
                 .copyWith(color: Colors.white),
           ),
           backgroundColor: Colors.black,
@@ -102,10 +102,10 @@ class _SpeedometerAppState extends State<SpeedometerApp> {
 /// TextButton that enables user to select this particular unit
 class UnitSelectionButton extends StatelessWidget {
   const UnitSelectionButton({
-    Key key,
+    Key? key,
     this.unitButtonName = 'm/s',
-    @required this.currentSelectedUnit,
-    @required this.unitSelector,
+    required this.currentSelectedUnit,
+    required this.unitSelector,
   }) : super(key: key);
 
   final String unitButtonName, currentSelectedUnit;
@@ -130,9 +130,9 @@ class UnitSelectionButton extends StatelessWidget {
 /// MaterialApp that launches when permissions still being searched, or denied forever.
 class NoPermissionApp extends StatelessWidget {
   const NoPermissionApp({
-    Key key,
-    @required bool hasCheckedPermissions,
-  })  : _hasCheckedPermissions = hasCheckedPermissions ?? false,
+    Key? key,
+    required bool hasCheckedPermissions,
+  })  : _hasCheckedPermissions = hasCheckedPermissions,
         super(key: key);
 
   final bool _hasCheckedPermissions;

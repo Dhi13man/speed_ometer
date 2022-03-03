@@ -8,18 +8,18 @@ import 'package:numberpicker/numberpicker.dart';
 /// Available settings: Narration On or Off, Frequency of Narration, Male or Female TTS Voice
 class TextToSpeechSettingsForm extends StatelessWidget {
   const TextToSpeechSettingsForm({
-    @required this.isTTSActive,
-    @required this.isTTSFemale,
-    @required this.currentDuration,
-    @required this.activeSetter,
-    @required this.femaleSetter,
-    @required this.durationSetter,
-    Key key,
+    required this.isTTSActive,
+    required this.isTTSFemale,
+    required this.currentDuration,
+    required this.activeSetter,
+    required this.femaleSetter,
+    required this.durationSetter,
+    Key? key,
   }) : super(key: key);
 
   final bool isTTSActive;
   final bool isTTSFemale;
-  final Duration currentDuration;
+  final Duration? currentDuration;
 
   final void Function(bool) activeSetter;
   final void Function(bool) femaleSetter;
@@ -95,18 +95,17 @@ class TextToSpeechSettingsForm extends StatelessWidget {
             ),
           ),
           GenderPickerWithImage(
-            showOtherGender: true,
             verticalAlignedText: false,
             selectedGender: (isTTSFemale) ? Gender.Female : Gender.Male,
             unSelectedGenderTextStyle: const TextStyle(color: Colors.white),
-            onChanged: (Gender gender) => femaleSetter(gender == Gender.Female),
+            onChanged: (Gender? gender) =>
+                femaleSetter(gender == Gender.Female),
             equallyAligned: true,
             animationDuration: const Duration(milliseconds: 300),
             isCircular: true,
-            // default : true,
             opacityOfGradient: 0.4,
             padding: const EdgeInsets.all(3),
-            size: 70, //default : 40
+            size: 70,
           ),
         ],
       ),
@@ -117,11 +116,11 @@ class TextToSpeechSettingsForm extends StatelessWidget {
 /// Pop up form that allows user to change Frequency of Speed Narration when button pressed.
 class TimeForm extends StatefulWidget {
   const TimeForm(
-      {Key key,
-      @required int currentSeconds,
-      @required int currentMinutes,
-      @required this.durationSetter,
-      @required this.parentScaffold})
+      {Key? key,
+      required int currentSeconds,
+      required int currentMinutes,
+      required this.durationSetter,
+      required this.parentScaffold})
       : _currentMinutes = currentMinutes,
         _currentSeconds = currentSeconds,
         super(key: key);
@@ -136,7 +135,9 @@ class TimeForm extends StatefulWidget {
 }
 
 class _TimeFormState extends State<TimeForm> {
-  int _currentSeconds, _currentMinutes;
+  late int _currentSeconds;
+
+  late int _currentMinutes;
 
   @override
   void initState() {
@@ -149,11 +150,12 @@ class _TimeFormState extends State<TimeForm> {
   @override
   Widget build(BuildContext context) {
     const TextStyle selectedTextStyle = TextStyle(
-          color: Color(0xFFE9A246),
-          fontSize: 25,
-          fontWeight: FontWeight.bold,
-        ),
-        unselectedTextStyle = TextStyle(color: Colors.white38, fontSize: 20);
+      color: Color(0xFFE9A246),
+      fontSize: 25,
+      fontWeight: FontWeight.bold,
+    );
+    const TextStyle unselectedTextStyle =
+        TextStyle(color: Colors.white38, fontSize: 20);
     return SizedBox(
       height: 230,
       child: Column(
@@ -205,29 +207,17 @@ class _TimeFormState extends State<TimeForm> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Please convert to minutes!')),
                   );
-                  return null;
                 } else if (seconds < 0) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Please enter postive time!')),
                   );
-                  return null;
-                }
-                if (seconds > 60) {
+                } else if (minutes < 1 && minutes > 60) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Enter between 1 and 60 minutes!'),
                     ),
                   );
-                  return null;
-                } else if (seconds < 0) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please enter postive time!'),
-                    ),
-                  );
-                  return null;
-                }
-                if (convertedTime < 3) {
+                } else if (convertedTime < 3) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(
@@ -235,13 +225,12 @@ class _TimeFormState extends State<TimeForm> {
                       ),
                     ),
                   );
-                  return null;
+                } else {
+                  /// Set Narration Frequency duration to new converted Duration.
+                  /// Duration [convertedTime] taken and converted from NumberPicker widget.
+                  widget.durationSetter(convertedTime);
+                  Navigator.of(context).pop();
                 }
-
-                /// Set Narration Frequency duration to new converted Duration.
-                /// Duration [convertedTime] taken and converted from NumberPicker widget.
-                widget.durationSetter(convertedTime);
-                Navigator.of(context).pop();
               },
               child: const Text(
                 'Update Frequency',

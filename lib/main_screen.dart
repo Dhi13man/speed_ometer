@@ -9,7 +9,7 @@ import 'package:speed_ometer/components/speedometer.dart';
 import 'package:speed_ometer/tts_form.dart';
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({this.unit = 'm/s', Key key}) : super(key: key);
+  const MainScreen({this.unit = 'm/s', Key? key}) : super(key: key);
 
   final String unit;
 
@@ -18,13 +18,13 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  SharedPreferences _sharedPreferences;
+  SharedPreferences? _sharedPreferences;
   // For text to speed naration of current velocity
   /// Initiate service
-  FlutterTts _ttsService;
+  late FlutterTts _ttsService;
 
   /// Create a stream trying to speak speed
-  StreamSubscription _ttsCallback;
+  StreamSubscription? _ttsCallback;
 
   /// String that the tts will read aloud, Speed + Expanded Unit
   String get speakText {
@@ -43,7 +43,7 @@ class _MainScreenState extends State<MainScreen> {
         unit = 'meters per second';
         break;
     }
-    return '${convertedVelocity(_velocity).toStringAsFixed(2)} $unit';
+    return '${convertedVelocity(_velocity)!.toStringAsFixed(2)} $unit';
   }
 
   void _startTTS() {
@@ -57,7 +57,7 @@ class _MainScreenState extends State<MainScreen> {
 
     if (_isTTSActive) _ttsService.speak(speakText);
     _ttsCallback =
-        Stream.periodic(_ttsDuration + const Duration(seconds: 1)).listen(
+        Stream.periodic(_ttsDuration! + const Duration(seconds: 1)).listen(
       (event) {
         if (_isTTSActive) _ttsService.speak(speakText);
       },
@@ -89,7 +89,7 @@ class _MainScreenState extends State<MainScreen> {
       );
 
   /// TTS talk duraiton
-  Duration _ttsDuration;
+  Duration? _ttsDuration;
   void setDuration(int seconds) => setState(
         () {
           _ttsDuration = _secondsToDuration(seconds);
@@ -109,14 +109,14 @@ class _MainScreenState extends State<MainScreen> {
   GeolocatorPlatform locator = GeolocatorPlatform.instance;
 
   /// Stream that emits values when velocity updates
-  final StreamController<double> _velocityUpdatedStreamController =
-      StreamController<double>();
+  final StreamController<double?> _velocityUpdatedStreamController =
+      StreamController<double?>();
 
   /// Current Velocity in m/s
-  double _velocity;
+  double? _velocity;
 
   /// Highest recorded velocity so far in m/s.
-  double _highestVelocity;
+  double? _highestVelocity;
 
   /// Velocity in m/s to km/hr converter
   double mpstokmph(double mps) => mps * 18 / 5;
@@ -125,15 +125,15 @@ class _MainScreenState extends State<MainScreen> {
   double mpstomilesph(double mps) => mps * 85 / 38;
 
   /// Relevant velocity in chosen unit
-  double convertedVelocity(double velocity) {
+  double? convertedVelocity(double? velocity) {
     velocity = velocity ?? _velocity;
 
     if (widget.unit == 'm/s') {
       return velocity;
     } else if (widget.unit == 'km/h') {
-      return mpstokmph(velocity);
+      return mpstokmph(velocity!);
     } else if (widget.unit == 'miles/h') {
-      return mpstomilesph(velocity);
+      return mpstomilesph(velocity!);
     }
     return velocity;
   }
@@ -178,7 +178,7 @@ class _MainScreenState extends State<MainScreen> {
     locator.getCurrentPosition().then(
       (Position updatedPosition) {
         _velocity = (speed + updatedPosition.speed) / 2;
-        if (_velocity > _highestVelocity) _highestVelocity = _velocity;
+        if (_velocity! > _highestVelocity!) _highestVelocity = _velocity;
         _velocityUpdatedStreamController.add(_velocity);
       },
     );
@@ -192,7 +192,7 @@ class _MainScreenState extends State<MainScreen> {
       scrollDirection: Axis.vertical,
       children: <Widget>[
         // StreamBuilder updates Speedometer when new velocity recieved
-        StreamBuilder<Object>(
+        StreamBuilder<Object?>(
           stream: _velocityUpdatedStreamController.stream,
           builder: (context, snapshot) {
             return Speedometer(
@@ -221,7 +221,7 @@ class _MainScreenState extends State<MainScreen> {
     // Velocity Stream
     _velocityUpdatedStreamController.close();
     // TTS
-    _ttsCallback.cancel();
+    _ttsCallback!.cancel();
     _ttsService.stop();
     super.dispose();
   }

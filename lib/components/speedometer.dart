@@ -6,18 +6,18 @@ import 'package:syncfusion_flutter_gauges/gauges.dart';
 /// Also shows highest speed so far since app was opened
 class Speedometer extends StatelessWidget {
   const Speedometer({
-    Key key,
-    @required this.gaugeBegin,
-    @required this.gaugeEnd,
-    @required this.velocity,
-    @required this.maxVelocity,
-    @required this.velocityUnit,
+    Key? key,
+    required this.gaugeBegin,
+    required this.gaugeEnd,
+    required this.velocity,
+    required this.maxVelocity,
+    required this.velocityUnit,
   }) : super(key: key);
 
   final double gaugeBegin;
   final double gaugeEnd;
-  final double velocity;
-  final double maxVelocity;
+  final double? velocity;
+  final double? maxVelocity;
 
   final String velocityUnit;
 
@@ -70,7 +70,7 @@ class Speedometer extends StatelessWidget {
           pointers: <GaugePointer>[
             // Current Speed pointer
             NeedlePointer(
-              value: maxVelocity,
+              value: maxVelocity!,
               needleLength: 0.95,
               enableAnimation: true,
               animationType: AnimationType.ease,
@@ -81,7 +81,7 @@ class Speedometer extends StatelessWidget {
             ),
             // Highest Speed pointer
             NeedlePointer(
-              value: velocity,
+              value: velocity!,
               needleLength: 0.95,
               enableAnimation: true,
               animationType: AnimationType.ease,
@@ -97,7 +97,7 @@ class Speedometer extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Text(
-                    velocity.toStringAsFixed(2),
+                    velocity!.toStringAsFixed(2),
                     style: _annotationTextStyle.copyWith(fontSize: 25),
                   ),
                   const SizedBox(width: 10),
