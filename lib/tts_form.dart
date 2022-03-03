@@ -80,7 +80,6 @@ class TextToSpeechSettingsForm extends StatelessWidget {
                     currentMinutes: (currentDuration?.inMinutes ?? 0) % 60,
                     currentSeconds: (currentDuration?.inSeconds ?? 3) % 60,
                     durationSetter: durationSetter,
-                    parentScaffold: Scaffold.of(context),
                   ),
                 ),
               ),
@@ -115,20 +114,17 @@ class TextToSpeechSettingsForm extends StatelessWidget {
 
 /// Pop up form that allows user to change Frequency of Speed Narration when button pressed.
 class TimeForm extends StatefulWidget {
-  const TimeForm(
-      {Key? key,
-      required int currentSeconds,
-      required int currentMinutes,
-      required this.durationSetter,
-      required this.parentScaffold})
-      : _currentMinutes = currentMinutes,
+  const TimeForm({
+    required int currentSeconds,
+    required int currentMinutes,
+    required this.durationSetter,
+    Key? key,
+  })  : _currentMinutes = currentMinutes,
         _currentSeconds = currentSeconds,
         super(key: key);
 
   final int _currentSeconds, _currentMinutes;
   final void Function(int) durationSetter;
-
-  final ScaffoldState parentScaffold;
 
   @override
   _TimeFormState createState() => _TimeFormState();
@@ -164,15 +160,27 @@ class _TimeFormState extends State<TimeForm> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              NumberPicker(
-                zeroPad: true,
-                selectedTextStyle: selectedTextStyle,
-                textStyle: unselectedTextStyle,
-                itemWidth: 65,
-                value: _currentMinutes,
-                minValue: 0,
-                maxValue: 59,
-                onChanged: (value) => setState(() => _currentMinutes = value),
+              StreamBuilder<Object>(
+                stream: null,
+                builder: (context, snapshot) {
+                  return NumberPicker(
+                    zeroPad: true,
+                    selectedTextStyle: selectedTextStyle,
+                    textStyle: unselectedTextStyle,
+                    itemWidth: 65,
+                    value: _currentMinutes,
+                    minValue: 0,
+                    maxValue: 59,
+                    onChanged: (value) => setState(
+                      () {
+                        _currentMinutes = value;
+                        if (value == 0 && _currentSeconds < 3) {
+                          _currentSeconds = 3;
+                        }
+                      },
+                    ),
+                  );
+                }
               ),
               const Text(
                 ':',
@@ -184,9 +192,12 @@ class _TimeFormState extends State<TimeForm> {
                 textStyle: unselectedTextStyle,
                 itemWidth: 65,
                 value: _currentSeconds,
-                minValue: 3,
+                minValue: _currentMinutes > 0 ? 0 : 3,
                 maxValue: 59,
-                onChanged: (value) => setState(() => _currentSeconds = value),
+                onChanged: (value) => setState(
+                  () => _currentSeconds =
+                      _currentMinutes > 0 || value >= 3 ? value : 3,
+                ),
               ),
             ],
           ),
@@ -200,22 +211,11 @@ class _TimeFormState extends State<TimeForm> {
               ),
               onPressed: () {
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                final int minutes = _currentMinutes;
-                final int seconds = _currentSeconds % 60;
-                final int convertedTime = minutes * 60 + seconds;
-                if (seconds > 60) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please convert to minutes!')),
-                  );
-                } else if (seconds < 0) {
+                final int convertedTime =
+                    _currentMinutes * 60 + _currentSeconds;
+                if (convertedTime <= 0) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Please enter postive time!')),
-                  );
-                } else if (minutes < 1 && minutes > 60) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Enter between 1 and 60 minutes!'),
-                    ),
                   );
                 } else if (convertedTime < 3) {
                   ScaffoldMessenger.of(context).showSnackBar(
