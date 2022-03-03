@@ -161,27 +161,26 @@ class _TimeFormState extends State<TimeForm> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               StreamBuilder<Object>(
-                stream: null,
-                builder: (context, snapshot) {
-                  return NumberPicker(
-                    zeroPad: true,
-                    selectedTextStyle: selectedTextStyle,
-                    textStyle: unselectedTextStyle,
-                    itemWidth: 65,
-                    value: _currentMinutes,
-                    minValue: 0,
-                    maxValue: 59,
-                    onChanged: (value) => setState(
-                      () {
-                        _currentMinutes = value;
-                        if (value == 0 && _currentSeconds < 3) {
-                          _currentSeconds = 3;
-                        }
-                      },
-                    ),
-                  );
-                }
-              ),
+                  stream: null,
+                  builder: (context, snapshot) {
+                    return NumberPicker(
+                      zeroPad: true,
+                      selectedTextStyle: selectedTextStyle,
+                      textStyle: unselectedTextStyle,
+                      itemWidth: 65,
+                      value: _currentMinutes,
+                      minValue: 0,
+                      maxValue: 59,
+                      onChanged: (value) => setState(
+                        () {
+                          _currentMinutes = value;
+                          if (value == 0 && _currentSeconds < 3) {
+                            _currentSeconds = 3;
+                          }
+                        },
+                      ),
+                    );
+                  }),
               const Text(
                 ':',
                 style: TextStyle(fontSize: 25, color: Colors.white24),

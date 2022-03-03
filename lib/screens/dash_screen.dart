@@ -6,18 +6,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 import 'package:speed_ometer/components/speedometer.dart';
-import 'package:speed_ometer/tts_form.dart';
+import 'package:speed_ometer/components/tts_form.dart';
 
-class MainScreen extends StatefulWidget {
-  const MainScreen({this.unit = 'm/s', Key? key}) : super(key: key);
+class DashScreen extends StatefulWidget {
+  const DashScreen({this.unit = 'm/s', Key? key}) : super(key: key);
 
   final String unit;
 
   @override
-  _MainScreenState createState() => _MainScreenState();
+  _DashScreenState createState() => _DashScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _DashScreenState extends State<DashScreen> {
   SharedPreferences? _sharedPreferences;
   // For text to speed naration of current velocity
   /// Initiate service
@@ -109,8 +109,7 @@ class _MainScreenState extends State<MainScreen> {
   GeolocatorPlatform locator = GeolocatorPlatform.instance;
 
   /// Stream that emits values when velocity updates
-  final StreamController<double?> _velocityUpdatedStreamController =
-      StreamController<double?>();
+  late StreamController<double?> _velocityUpdatedStreamController;
 
   /// Current Velocity in m/s
   double? _velocity;
@@ -142,6 +141,7 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     // Speedometer functionality. Updates any time velocity chages.
+    _velocityUpdatedStreamController = StreamController<double?>();
     locator
         .getPositionStream(
           locationSettings: const LocationSettings(
