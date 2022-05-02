@@ -3,33 +3,45 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:geolocator/geolocator.dart';
 
-import 'package:speed_ometer/main_screen.dart';
+import 'package:speed_ometer/screens/dash_screen.dart';
 
-void main() {
+Future<void> main() async {
   // Placeholder Splash Screen Material App.
-  runApp(NoPermissionApp(hasCheckedPermissions: false));
+  runApp(const NoPermissionApp(hasCheckedPermissions: false));
   WidgetsFlutterBinding.ensureInitialized();
 
-  Geolocator.checkPermission().then(
-    (LocationPermission permission) {
-      // App must be reinstalled to be used if permission denied forever.
-      if (permission == LocationPermission.deniedForever)
-        runApp(NoPermissionApp(hasCheckedPermissions: true));
-      else // Run app and ask for permissions.
-        runApp(SpeedometerApp());
-    },
-  );
+  LocationPermission permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied ||
+      permission == LocationPermission.unableToDetermine) {
+    permission = await GeolocatorPlatform.instance.requestPermission();
+  }
+  switch (permission) {
+    case LocationPermission.deniedForever:
+      runApp(const NoPermissionApp(hasCheckedPermissions: true));
+      break;
+
+    case LocationPermission.always:
+    case LocationPermission.whileInUse:
+      runApp(const SpeedometerApp());
+      break;
+
+    case LocationPermission.denied:
+    case LocationPermission.unableToDetermine:
+      runApp(const NoPermissionApp(hasCheckedPermissions: false));
+  }
 }
 
 /// MaterialApp that launches when proper permissions granted
 class SpeedometerApp extends StatefulWidget {
+  const SpeedometerApp({Key? key}) : super(key: key);
+
   @override
   _SpeedometerAppState createState() => _SpeedometerAppState();
 }
 
 class _SpeedometerAppState extends State<SpeedometerApp> {
   /// Shared preferences to be loaded for persistence.
-  SharedPreferences sharedPreferences;
+  SharedPreferences? sharedPreferences;
 
   /// Unit selection
   final List<String> units = const <String>['m/s', 'km/h', 'miles/h'];
@@ -37,7 +49,9 @@ class _SpeedometerAppState extends State<SpeedometerApp> {
 
   /// Function to save newly selected unit [newUnit] to persistent storage if possible, and update state.
   void unitSelectorFunciton(String newUnit) {
-    if (sharedPreferences != null) sharedPreferences.setString('unit', newUnit);
+    if (sharedPreferences != null) {
+      sharedPreferences!.setString('unit', newUnit);
+    }
     setState(() => currentSelectedUnit = newUnit);
   }
 
@@ -75,14 +89,14 @@ class _SpeedometerAppState extends State<SpeedometerApp> {
             'Speedometer',
             style: Theme.of(context)
                 .textTheme
-                .headline6
+                .headline6!
                 .copyWith(color: Colors.white),
           ),
           backgroundColor: Colors.black,
           // Makes one Unit Selection button for each potential unit (m/s, km/h and miles/h programmed)
           actions: units.map<Widget>(
             (String unitType) {
-              return UnitSelectionButton(
+              return _UnitSelectionButton(
                 unitButtonName: unitType,
                 currentSelectedUnit: currentSelectedUnit,
                 unitSelector: unitSelectorFunciton,
@@ -90,19 +104,19 @@ class _SpeedometerAppState extends State<SpeedometerApp> {
             },
           ).toList(),
         ),
-        body: MainScreen(unit: currentSelectedUnit),
+        body: DashScreen(unit: currentSelectedUnit),
       ),
     );
   }
 }
 
 /// TextButton that enables user to select this particular unit
-class UnitSelectionButton extends StatelessWidget {
-  const UnitSelectionButton({
-    Key key,
+class _UnitSelectionButton extends StatelessWidget {
+  const _UnitSelectionButton({
+    Key? key,
     this.unitButtonName = 'm/s',
-    @required this.currentSelectedUnit,
-    @required this.unitSelector,
+    required this.currentSelectedUnit,
+    required this.unitSelector,
   }) : super(key: key);
 
   final String unitButtonName, currentSelectedUnit;
@@ -112,13 +126,12 @@ class UnitSelectionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final Color textColor = unitButtonName != currentSelectedUnit
         ? Colors.white
-        : Color(0xFFE9A246);
+        : const Color(0xFFE9A246);
     return Container(
-      padding: EdgeInsets.only(right: 10),
-      child: FlatButton(
+      padding: const EdgeInsets.only(right: 10),
+      child: TextButton(
         onPressed: () => unitSelector(unitButtonName),
-        minWidth: 0,
-        padding: EdgeInsets.zero,
+        style: ButtonStyle(padding: MaterialStateProperty.all(EdgeInsets.zero)),
         child: Text(unitButtonName, style: TextStyle(color: textColor)),
       ),
     );
@@ -128,9 +141,9 @@ class UnitSelectionButton extends StatelessWidget {
 /// MaterialApp that launches when permissions still being searched, or denied forever.
 class NoPermissionApp extends StatelessWidget {
   const NoPermissionApp({
-    Key key,
-    @required bool hasCheckedPermissions,
-  })  : _hasCheckedPermissions = hasCheckedPermissions ?? false,
+    Key? key,
+    required bool hasCheckedPermissions,
+  })  : _hasCheckedPermissions = hasCheckedPermissions,
         super(key: key);
 
   final bool _hasCheckedPermissions;
@@ -139,23 +152,23 @@ class NoPermissionApp extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget outWidget;
     // Splash screen mode
-    if (!_hasCheckedPermissions)
-      outWidget = Image(
+    if (!_hasCheckedPermissions) {
+      outWidget = const Image(
         image: AssetImage('images/splash_image.png'),
         alignment: Alignment.center,
         fit: BoxFit.contain,
       );
-    // Error Message mode
-    else
-      outWidget = Text(
-        'Location permissions permanently denied!\n' +
-            'Please reinstall app and provide permissions!',
+    } else {
+      outWidget = const Text(
+        'Location permissions permanently denied!\n'
+        'Please reinstall app and provide permissions!',
         style: TextStyle(
           color: Colors.red,
           fontSize: 15,
           fontWeight: FontWeight.bold,
         ),
       );
+    }
     return MaterialApp(
       home: Scaffold(
         backgroundColor: Colors.black,
