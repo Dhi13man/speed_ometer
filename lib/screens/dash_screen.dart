@@ -47,9 +47,8 @@ class _DashScreenState extends State<DashScreen> {
   }
 
   void _startTTS() {
-    // _ttsService.getVoices.then(print);
     if (!_isTTSFemale) {
-      _ttsService.setVoice({'name': 'en-gb-x-gbd-local', 'locale': 'en-GB'});
+      _ttsService.setVoice({'name': 'en-us-x-tpd-local', 'locale': 'en-US'});
     } else {
       _ttsService.setVoice({'name': 'en-US-language', 'locale': 'en-US'});
     }
@@ -57,9 +56,8 @@ class _DashScreenState extends State<DashScreen> {
     _ttsCallback?.cancel();
 
     if (_isTTSActive) _ttsService.speak(speakText);
-    _ttsCallback = Stream.periodic(
-      (_ttsDuration ?? Duration.zero) + const Duration(seconds: 1),
-    ).listen(
+    _ttsCallback =
+        Stream.periodic(_ttsDuration! + const Duration(seconds: 1)).listen(
       (event) {
         if (_isTTSActive) _ttsService.speak(speakText);
       },
