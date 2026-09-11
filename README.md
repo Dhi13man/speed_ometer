@@ -2,6 +2,18 @@
 
 A speedometer that displays the current velocity of the phone's movement, while also narrating it in the background.
 
+
+## Install
+
+Flutter SDK. Clone, fetch packages, and run on a device with location permission:
+
+```sh
+git clone https://github.com/Dhi13man/speed_ometer.git
+cd speed_ometer
+flutter pub get
+flutter run
+```
+
 ## Features
 
 1. Real time speed detection using GPS, and displaying using a Speedomeeter UI.
@@ -67,3 +79,11 @@ A speedometer that displays the current velocity of the phone's movement, while 
 
 • No issues found!
 ```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+See [LICENSE](LICENSE).
